@@ -1,23 +1,16 @@
-import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react'
+import path from "path"
+import { defineConfig } from 'vite'
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
-
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  root: '.',
-  publicDir: 'public',
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    outDir: 'dist',
-  },
   server: {
-    open: true,
+    allowedHosts: ["aa8eaf85e8f5.ngrok-free.app"],
   },
-});
+})
