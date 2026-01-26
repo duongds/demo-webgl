@@ -122,7 +122,7 @@ demo-midu/
 #### Step 2.3: Third-Person Camera
 - [x] Camera follows character position
 - [x] Smooth camera transitions (lerp)
-- [ ] Camera constraints and boundaries
+- [x] Camera constraints and boundaries
 
 ---
 
