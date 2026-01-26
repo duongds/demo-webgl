@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import useGameStore from '../stores/useGameStore';
 
 interface KeyState {
   [key: string]: boolean
@@ -43,26 +44,37 @@ const useKeyboard = (): UseKeyboardReturn => {
   }, [handleKeyDown, handleKeyUp, handleBlur])
 
   const isKeyPressed = useCallback((key: string): boolean => {
+    // Check key from GameStore (VirtualJoystick)
+    const storeKeys = useGameStore.getState().keys
+    if (key === 'w' && storeKeys.forward) return true
+    if (key === 's' && storeKeys.backward) return true
+    if (key === 'a' && storeKeys.left) return true
+    if (key === 'd' && storeKeys.right) return true
+    if (key === 'shift' && storeKeys.sprint) return true
+
     return keysPressed.current[key.toLowerCase()] || false
   }, [])
 
   const getMovementVector = useCallback((): { x: number; z: number } => {
     let x = 0
     let z = 0
+    
+    // Get store keys (Virtual Joystick)
+    const storeKeys = useGameStore.getState().keys
 
-    // Forward/Backward (W/S or ArrowUp/ArrowDown)
-    if (keysPressed.current['w'] || keysPressed.current['arrowup']) {
+    // Forward/Backward (W/S or ArrowUp/ArrowDown or Joystick)
+    if (keysPressed.current['w'] || keysPressed.current['arrowup'] || storeKeys.forward) {
       z -= 1
     }
-    if (keysPressed.current['s'] || keysPressed.current['arrowdown']) {
+    if (keysPressed.current['s'] || keysPressed.current['arrowdown'] || storeKeys.backward) {
       z += 1
     }
 
-    // Left/Right (A/D or ArrowLeft/ArrowRight)
-    if (keysPressed.current['a'] || keysPressed.current['arrowleft']) {
+    // Left/Right (A/D or ArrowLeft/ArrowRight or Joystick)
+    if (keysPressed.current['a'] || keysPressed.current['arrowleft'] || storeKeys.left) {
       x -= 1
     }
-    if (keysPressed.current['d'] || keysPressed.current['arrowright']) {
+    if (keysPressed.current['d'] || keysPressed.current['arrowright'] || storeKeys.right) {
       x += 1
     }
 

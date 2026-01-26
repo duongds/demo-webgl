@@ -24,6 +24,15 @@ interface GameState {
   nearestPainting: PaintingData | null
   selectedPainting: PaintingData | null
   
+  // Input State
+  keys: {
+    forward: boolean
+    backward: boolean
+    left: boolean
+    right: boolean
+    sprint: boolean
+  }
+  
   // Actions
   setCharacterPosition: (position: THREE.Vector3) => void
   setCharacterRotation: (rotation: number) => void
@@ -35,6 +44,7 @@ interface GameState {
   registerPainting: (painting: PaintingData) => void
   setNearestPainting: (painting: PaintingData | null) => void
   setSelectedPainting: (painting: PaintingData | null) => void
+  setKeys: (keys: Partial<GameState['keys']>) => void
 }
 
 const useGameStore = create<GameState>((set) => ({
@@ -50,6 +60,13 @@ const useGameStore = create<GameState>((set) => ({
   paintings: [],
   nearestPainting: null,
   selectedPainting: null,
+  keys: {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    sprint: false,
+  },
 
   setCharacterPosition: (position) =>
     set((state) => ({
@@ -92,6 +109,11 @@ const useGameStore = create<GameState>((set) => ({
 
   setSelectedPainting: (painting) =>
     set({ selectedPainting: painting }),
+
+  setKeys: (keys) =>
+    set((state) => ({
+      keys: { ...state.keys, ...keys }
+    })),
 }))
 
 export default useGameStore

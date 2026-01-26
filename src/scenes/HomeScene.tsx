@@ -1,16 +1,18 @@
 import { Environment, Sparkles } from '@react-three/drei'
 import Character from '../components/canvas/Character'
+import DynamicLights from '../components/canvas/DynamicLights'
 import Floor from '../components/canvas/Floor'
 import FollowCamera from '../components/canvas/FollowCamera'
 import Gallery from '../components/canvas/Gallery'
-import Lights from '../components/canvas/Lights'
+import { OutlineProvider } from '../components/canvas/OutlineProvider'
 import useProximity from '../hooks/useProximity'
 
 const HomeScene = () => {
     useProximity(3.5)
     return (
-        <>
-            <Lights />
+        // DISABLE Post-processing temporarily to fix LAG
+        <OutlineProvider enabled={false} outlineColor="#6366f1">
+            <DynamicLights enableColorCycle={true} cycleSpeed={0.1} />
             <Gallery />
             <Character />
             <Floor />
@@ -22,20 +24,21 @@ const HomeScene = () => {
                 smoothness={5}
             />
 
-            {/* Atmospheric dust motes */}
+            {/* Atmospheric dust motes - drastically reduced */}
             <Sparkles
-                count={200}
+                count={50}
                 scale={[30, 10, 30]}
-                size={1.5}
-                speed={0.2}
-                opacity={0.3}
+                size={2}
+                speed={0.1}
+                opacity={0.1}
                 color="#fff"
             />
 
             {/* Environment map for reflections */}
             <Environment preset="night" />
-        </>
+        </OutlineProvider>
     )
 }
 
 export default HomeScene
+

@@ -176,9 +176,9 @@ demo-midu/
 > **Goal**: Polish and advanced effects
 
 #### Step 5.1: Custom Shaders
-- [ ] Learn GLSL basics
-- [ ] Create sketch/pencil style shader
-- [ ] Apply to character and environment
+- [x] Learn GLSL basics
+- [x] Create sketch/pencil style shader (Loading Screen)
+- [x] Apply to character and environment
 
 #### Step 5.2: Model Loading
 - [ ] Load 3D character model (.glb)

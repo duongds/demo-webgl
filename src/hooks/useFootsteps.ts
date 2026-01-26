@@ -1,50 +1,85 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
+import useAudioStore from '../stores/useAudioStore'
 import useGameStore from '../stores/useGameStore'
 
-const FOOTSTEP_URL = 'https://assets.mixkit.co/active_storage/sfx/2092/2092-preview.mp3'
+// Multiple footstep sounds for variation
+const FOOTSTEP_URLS = [
+    'https://assets.mixkit.co/active_storage/sfx/2092/2092-preview.mp3',
+    'https://assets.mixkit.co/active_storage/sfx/2093/2093-preview.mp3',
+]
 
 const useFootsteps = () => {
-  const isMoving = useGameStore((state) => state.character.isMoving)
-  const isRunning = useGameStore((state) => state.character.isRunning)
-  const audio = useRef<HTMLAudioElement | null>(null)
-  const interval = useRef<any>(null)
-
-  useEffect(() => {
-    // Preload audio
-    audio.current = new Audio(FOOTSTEP_URL)
-    audio.current.volume = 0.2
+    const isMoving = useGameStore((state) => state.character.isMoving)
+    const isRunning = useGameStore((state) => state.character.isRunning)
     
-    return () => {
-      if (interval.current) clearInterval(interval.current)
-    }
-  }, [])
+    const { masterVolume, sfxVolume, isMuted } = useAudioStore()
+    
+    const audioPool = useRef<HTMLAudioElement[]>([])
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const currentIndex = useRef(0)
 
-  useEffect(() => {
-    if (isMoving) {
-      const pace = isRunning ? 250 : 400
-      
-      const playFootstep = () => {
-        if (audio.current) {
-          audio.current.currentTime = 0
-          audio.current.play().catch(() => {})
+    // Calculate effective volume
+    const effectiveVolume = isMuted ? 0 : masterVolume * sfxVolume * 0.4
+
+    // Initialize audio pool
+    useEffect(() => {
+        audioPool.current = FOOTSTEP_URLS.map(url => {
+            const audio = new Audio(url)
+            audio.preload = 'auto'
+            return audio
+        })
+
+        return () => {
+            audioPool.current.forEach(audio => {
+                audio.pause()
+                audio.src = ''
+            })
         }
-      }
+    }, [])
 
-      // Initial step
-      playFootstep()
-      
-      interval.current = setInterval(playFootstep, pace)
-    } else {
-      if (interval.current) {
-        clearInterval(interval.current)
-        interval.current = null
-      }
-    }
+    // Update volumes
+    useEffect(() => {
+        audioPool.current.forEach(audio => {
+            audio.volume = effectiveVolume
+        })
+    }, [effectiveVolume])
 
-    return () => {
-      if (interval.current) clearInterval(interval.current)
-    }
-  }, [isMoving, isRunning])
+    // Play footstep with round-robin selection
+    const playFootstep = useCallback(() => {
+        if (audioPool.current.length === 0 || isMuted) return
+        
+        const audio = audioPool.current[currentIndex.current]
+        audio.currentTime = 0
+        audio.play().catch(() => {})
+        
+        // Alternate between sounds
+        currentIndex.current = (currentIndex.current + 1) % audioPool.current.length
+    }, [isMuted])
+
+    // Handle movement sound
+    useEffect(() => {
+        if (isMoving && !isMuted) {
+            const pace = isRunning ? 250 : 400
+
+            // Initial step
+            playFootstep()
+
+            intervalRef.current = setInterval(playFootstep, pace)
+        } else {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+                intervalRef.current = null
+            }
+        }
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+                intervalRef.current = null
+            }
+        }
+    }, [isMoving, isRunning, isMuted, playFootstep])
 }
 
 export default useFootsteps
+

@@ -7,24 +7,24 @@ import * as THREE from 'three'
  * It uses simple cross-hatching logic based on brightness.
  */
 const SketchMaterialImpl = shaderMaterial(
-    {
-        uMap: null,
-        uOpacity: 1,
-        uColor: new THREE.Color(1, 1, 1),
-        uStrokeColor: new THREE.Color(0, 0, 0),
-        uResolution: new THREE.Vector2(1, 1),
-        uTime: 0,
-    },
-    // Vertex Shader
-    `
+  {
+    uMap: null,
+    uOpacity: 1,
+    uColor: new THREE.Color(1, 1, 1),
+    uStrokeColor: new THREE.Color(0, 0, 0),
+    uResolution: new THREE.Vector2(1, 1),
+    uTime: 0,
+  },
+  // Vertex Shader
+  `
   varying vec2 vUv;
   void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
   `,
-    // Fragment Shader
-    `
+  // Fragment Shader
+  `
   uniform sampler2D uMap;
   uniform float uOpacity;
   uniform vec3 uColor;

@@ -1,4 +1,5 @@
 import { useFrame } from '@react-three/fiber'
+import { Select } from '@react-three/postprocessing'
 import { useRef } from 'react'
 import * as THREE from 'three'
 import useCharacterMovement from '../../hooks/useCharacterMovement'
@@ -29,9 +30,13 @@ const Character = () => {
 
     return (
         <group ref={groupRef}>
-            <PlayerModel />
+            {/* Wrap with Select for outline effect */}
+            <Select enabled>
+                <PlayerModel />
+            </Select>
         </group>
     )
 }
 
 export default Character
+
