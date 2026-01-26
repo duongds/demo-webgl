@@ -186,14 +186,14 @@ demo-midu/
 - [ ] Implement animation blending (idle, walk)
 
 #### Step 5.3: Scene Transitions
-- [ ] Page routing with React Router
+- [x] Page routing with React Router
 - [ ] 3D scene transitions
-- [ ] Loading states between scenes
+- [x] Loading states between scenes
 
 #### Step 5.4: Polish
 - [ ] Add sound effects
 - [ ] Footstep particles/effects
-- [ ] Menu and navigation
+- [x] Menu and navigation
 - [ ] Mobile touch controls (optional)
 
 ---
