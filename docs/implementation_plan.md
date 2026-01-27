@@ -152,49 +152,27 @@ demo-midu/
 - [x] Proximity Detection
 - [x] Interactive UI (Press Enter, Dialog View)
 
-### Phase 5: Advanced Features & Polish (Week 5)
+### Phase 5: Advanced Features & Polish (Week 5-6)
 > **Goal**: Add professional 3D assets, custom shaders, and final polish
 
 #### Step 5.1: Character Model & Animations
-- [x] Load GLB/GLTF character model
+- [x] Load GLB/GLTF character model (Local asset: /models/robot.glb)
 - [x] Implement skeletal animations (Idle, Walk, Run)
+- [x] Implement animation blending (idle, walk)
 - [x] Transition animations based on movement state
 
-#### Step 5.2: Technical Art (Shaders)
-- [x] Implement a custom "Sketch" or "Hatching" shader (Tested, simplified per feedback)
-- [x] Apply post-processing (Bloom, Color Grading) - [x] Initial setup done
-- [x] Add particle effects for atmosphere (Dust motes)
+#### Step 5.2: Technical Art (Shaders & Effects)
+- [x] Implement custom shader (Sketch/Hatching)
+- [x] Apply post-processing (Outline, Vignette - Optimized for performance)
+- [x] Add particle effects (Sparkles)
+- [x] Dynamic Lighting (Color cycling atmosphere)
 
-#### Step 5.3: Scene Transitions & Polish
-- [x] Implement smooth scene fade-in/out
-- [x] Add sound effects (Footsteps)
-- [x] Optimization for mobile and low-end devices (DPR adjusted)
-
----
-
-### Phase 5: Advanced Features (Week 5-6)
-> **Goal**: Polish and advanced effects
-
-#### Step 5.1: Custom Shaders
-- [x] Learn GLSL basics
-- [x] Create sketch/pencil style shader (Loading Screen)
-- [x] Apply to character and environment
-
-#### Step 5.2: Model Loading
-- [ ] Load 3D character model (.glb)
-- [ ] Add character animations
-- [ ] Implement animation blending (idle, walk)
-
-#### Step 5.3: Scene Transitions
-- [x] Page routing with React Router
-- [ ] 3D scene transitions
-- [x] Loading states between scenes
-
-#### Step 5.4: Polish
-- [ ] Add sound effects
-- [ ] Footstep particles/effects
-- [x] Menu and navigation
-- [ ] Mobile touch controls (optional)
+#### Step 5.3: Polish & Interaction
+- [x] Audio System (Background music, Footsteps, UI controls)
+- [x] Scene Transitions & Loading Screens
+- [x] Menu and Navigation (HUD, Settings)
+- [x] Mobile Support (Virtual Joystick, Responsive UI)
+- [x] Gallery Interaction (Proximity detection, Detail view)
 
 ---
 

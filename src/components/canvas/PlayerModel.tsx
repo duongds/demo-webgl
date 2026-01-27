@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import useGameStore from '../../stores/useGameStore'
 
-const MODEL_URL = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/RobotExpressive/RobotExpressive.glb'
+const MODEL_URL = '/models/robot.glb'
 
 const PlayerModel = () => {
     const group = useRef<THREE.Group>(null)
