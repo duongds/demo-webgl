@@ -14,6 +14,9 @@ const useKeyboard = (): UseKeyboardReturn => {
   const keysPressed = useRef<KeyState>({})
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Ignore Enter key in general movement hook to let HUD handle it
+    if (event.key === 'Enter') return;
+
     // Prevent default for arrow keys to avoid page scrolling
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(event.key.toLowerCase()) || 
         ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
@@ -23,6 +26,7 @@ const useKeyboard = (): UseKeyboardReturn => {
   }, [])
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Enter') return;
     keysPressed.current[event.key.toLowerCase()] = false
   }, [])
 

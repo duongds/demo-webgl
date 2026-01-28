@@ -16,13 +16,19 @@ const HUD = () => {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Enter' && nearestPainting && !selectedPainting) {
-                console.log('Opening painting via ENTER:', nearestPainting.title)
+            // Using e.code 'Enter' is more robust than e.key
+            if ((e.code === 'Enter' || e.key === 'Enter') && nearestPainting && !selectedPainting) {
+                e.preventDefault() // Prevent any default action
+                console.log('Action: Opening painting via ENTER key')
                 setSelectedPainting(nearestPainting)
             }
         }
-        window.addEventListener('keydown', handleKeyDown)
-        return () => window.removeEventListener('keydown', handleKeyDown)
+
+        // Ensure window is focused to capture keys
+        window.focus()
+
+        window.addEventListener('keydown', handleKeyDown, true) // Added capture phase
+        return () => window.removeEventListener('keydown', handleKeyDown, true)
     }, [nearestPainting, selectedPainting, setSelectedPainting])
 
     const handlePromptClick = () => {
@@ -128,28 +134,6 @@ const HUD = () => {
                 </h1>
                 <div className="h-px w-24 bg-gradient-to-l from-white/40 to-transparent ml-auto mt-2" />
             </div>
-            {/* Fallback Detail View if Dialog fails */}
-            {selectedPainting && (
-                <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-10 pointer-events-auto">
-                    <div className="max-w-4xl w-full bg-slate-900 border border-white/10 rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in duration-300">
-                        <div className="md:w-1/2 aspect-square md:aspect-auto bg-black">
-                            <img src={selectedPainting.url} className="w-full h-full object-contain" alt="" />
-                        </div>
-                        <div className="md:w-1/2 p-10 flex flex-col">
-                            <h2 className="text-3xl font-light text-white mb-4">{selectedPainting.title}</h2>
-                            <p className="text-slate-400 leading-relaxed mb-10">
-                                This is a high-resolution view of the artwork. Use this space to describe the masterpiece.
-                            </p>
-                            <button
-                                onClick={() => setSelectedPainting(null)}
-                                className="mt-auto bg-white text-black py-4 rounded-xl font-bold hover:bg-slate-200 transition-colors"
-                            >
-                                CLOSE VIEW
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </>
     )
 }
