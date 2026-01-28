@@ -128,43 +128,63 @@ const FollowCamera = ({
     useFrame((state, delta) => {
         if (!cameraRef.current) return
 
-        // Get latest character position from store directly to avoid stale closures
-        const characterPosition = useGameStore.getState().character.position
-
+        // Get latest character position and selected painting from store
+        const { character, selectedPainting } = useGameStore.getState()
+        const characterPosition = character.position
         const clampedDelta = Math.min(delta, 0.1)
 
-        // Calculate constrained offset based on character position
-        const newOffset = calculateConstrainedOffset(characterPosition)
+        if (selectedPainting) {
+            // ZOOMED MODE: Focus on painting
+            // Calculate a position in front of the painting
+            const zoomDistance = 3.5
+            // Create a vector pointing outward from the painting's surface
+            const offsetDir = new THREE.Vector3(0, 0, 1).applyEuler(selectedPainting.rotation)
 
-        // Smooth the offset changes for fluid camera movement
-        adjustedOffset.current.lerp(newOffset, smoothness * clampedDelta * 0.5)
+            targetPosition.current.copy(selectedPainting.position).add(offsetDir.multiplyScalar(zoomDistance))
+            // Ensure camera is at a good height
+            targetPosition.current.y = selectedPainting.position.y
 
-        // Calculate target camera position (character position + constrained offset)
-        targetPosition.current.set(
-            characterPosition.x + adjustedOffset.current.x,
-            characterPosition.y + adjustedOffset.current.y,
-            characterPosition.z + adjustedOffset.current.z
-        )
+            lookAtTarget.current.copy(selectedPainting.position)
 
-        // Apply final boundary constraints to target position
-        targetPosition.current.x = clamp(targetPosition.current.x, bounds.minX, bounds.maxX)
-        targetPosition.current.y = clamp(targetPosition.current.y, bounds.minY, bounds.maxY)
-        targetPosition.current.z = clamp(targetPosition.current.z, bounds.minZ, bounds.maxZ)
+            // Speed up movement during zoom for snappiness
+            const zoomSmoothness = smoothness * 1.5
+            currentPosition.current.lerp(targetPosition.current, zoomSmoothness * clampedDelta)
+        } else {
+            // NORMAL MODE: Follow character
 
-        // Smooth camera movement using lerp
-        currentPosition.current.lerp(targetPosition.current, smoothness * clampedDelta)
+            // Calculate constrained offset based on character position
+            const newOffset = calculateConstrainedOffset(characterPosition)
+
+            // Smooth the offset changes for fluid camera movement
+            adjustedOffset.current.lerp(newOffset, smoothness * clampedDelta * 0.5)
+
+            // Calculate target camera position (character position + constrained offset)
+            targetPosition.current.set(
+                characterPosition.x + adjustedOffset.current.x,
+                characterPosition.y + adjustedOffset.current.y,
+                characterPosition.z + adjustedOffset.current.z
+            )
+
+            // Apply final boundary constraints to target position
+            targetPosition.current.x = clamp(targetPosition.current.x, bounds.minX, bounds.maxX)
+            targetPosition.current.y = clamp(targetPosition.current.y, bounds.minY, bounds.maxY)
+            targetPosition.current.z = clamp(targetPosition.current.z, bounds.minZ, bounds.maxZ)
+
+            // Smooth camera movement using lerp
+            currentPosition.current.lerp(targetPosition.current, smoothness * clampedDelta)
+
+            // Calculate look-at target (always follows character)
+            lookAtTarget.current.set(
+                characterPosition.x + lookAtOffset[0],
+                characterPosition.y + lookAtOffset[1],
+                characterPosition.z + lookAtOffset[2]
+            )
+        }
 
         // Update camera position
         cameraRef.current.position.copy(currentPosition.current)
 
-        // Calculate look-at target (always follows character)
-        lookAtTarget.current.set(
-            characterPosition.x + lookAtOffset[0],
-            characterPosition.y + lookAtOffset[1],
-            characterPosition.z + lookAtOffset[2]
-        )
-
-        // Make camera look at character
+        // Make camera look at target
         cameraRef.current.lookAt(lookAtTarget.current)
 
         // Sync main camera

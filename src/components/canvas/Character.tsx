@@ -6,7 +6,7 @@ import useCharacterMovement from '../../hooks/useCharacterMovement'
 import useFootsteps from '../../hooks/useFootsteps'
 import useGameStore from '../../stores/useGameStore'
 
-import PlayerModel from './PlayerModel'
+import CustomCharacterModel from './CustomCharacterModel'
 
 const Character = () => {
     const groupRef = useRef<THREE.Group>(null)
@@ -23,7 +23,7 @@ const Character = () => {
         if (groupRef.current) {
             const storeState = useGameStore.getState()
             const storePos = storeState.character.position
-            groupRef.current.position.set(storePos.x, 0.6, storePos.z)
+            groupRef.current.position.set(storePos.x, 0.5, storePos.z)
             groupRef.current.rotation.y = storeState.character.rotation
         }
     })
@@ -32,7 +32,7 @@ const Character = () => {
         <group ref={groupRef}>
             {/* Wrap with Select for outline effect */}
             <Select enabled>
-                <PlayerModel />
+                <CustomCharacterModel />
             </Select>
         </group>
     )

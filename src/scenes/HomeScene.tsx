@@ -3,6 +3,7 @@ import Character from '../components/canvas/Character'
 import DynamicLights from '../components/canvas/DynamicLights'
 import Floor from '../components/canvas/Floor'
 import FollowCamera from '../components/canvas/FollowCamera'
+import Footprints from '../components/canvas/Footprints'
 import Gallery from '../components/canvas/Gallery'
 import { OutlineProvider } from '../components/canvas/OutlineProvider'
 import useProximity from '../hooks/useProximity'
@@ -15,6 +16,7 @@ const HomeScene = () => {
             <DynamicLights enableColorCycle={true} cycleSpeed={0.1} />
             <Gallery />
             <Character />
+            <Footprints />
             <Floor />
 
             {/* Third-person camera that follows the character */}

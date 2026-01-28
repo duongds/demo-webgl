@@ -38,7 +38,7 @@ const Home = () => {
     }, [])
 
     return (
-        <div className="relative w-full h-screen bg-[#0a0a0a]">
+        <div className="relative w-full h-screen bg-[#f0f0f0]">
             {/* Loading Screen with Sketch Shader */}
             {isLoading && (
                 <LoadingScreen onComplete={handleLoadingComplete} />
@@ -55,7 +55,7 @@ const Home = () => {
                     }}
                     dpr={[1, 2]}
                 >
-                    <color attach="background" args={['#0a0a0a']} />
+                    <color attach="background" args={['#f0f0f0']} />
                     <Suspense fallback={null}>
                         <HomeScene />
                     </Suspense>

@@ -12,6 +12,7 @@ interface CharacterState {
 interface PaintingData {
   id: string
   position: THREE.Vector3
+  rotation: THREE.Euler
   title: string
   url: string
 }
@@ -33,6 +34,9 @@ interface GameState {
     sprint: boolean
   }
   
+  // Footprints
+  footprints: { id: string; position: THREE.Vector3; rotation: number; opacity: number }[]
+  
   // Actions
   setCharacterPosition: (position: THREE.Vector3) => void
   setCharacterRotation: (rotation: number) => void
@@ -45,6 +49,8 @@ interface GameState {
   setNearestPainting: (painting: PaintingData | null) => void
   setSelectedPainting: (painting: PaintingData | null) => void
   setKeys: (keys: Partial<GameState['keys']>) => void
+  addFootprint: (position: THREE.Vector3, rotation: number) => void
+  updateFootprints: (delta: number) => void
 }
 
 const useGameStore = create<GameState>((set) => ({
@@ -67,6 +73,7 @@ const useGameStore = create<GameState>((set) => ({
     right: false,
     sprint: false,
   },
+  footprints: [],
 
   setCharacterPosition: (position) =>
     set((state) => ({
@@ -113,6 +120,26 @@ const useGameStore = create<GameState>((set) => ({
   setKeys: (keys) =>
     set((state) => ({
       keys: { ...state.keys, ...keys }
+    })),
+
+  addFootprint: (position, rotation) =>
+    set((state) => ({
+      footprints: [
+        ...state.footprints,
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          position: position.clone(),
+          rotation,
+          opacity: 1,
+        },
+      ].slice(-20), // Keep only last 20 footprints for performance
+    })),
+
+  updateFootprints: (delta) =>
+    set((state) => ({
+      footprints: state.footprints
+        .map((f) => ({ ...f, opacity: f.opacity - delta * 0.5 }))
+        .filter((f) => f.opacity > 0),
     })),
 }))
 

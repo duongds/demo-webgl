@@ -1,4 +1,3 @@
-import { useThree } from '@react-three/fiber'
 import { Bloom, EffectComposer, Noise, Select, Selection, Vignette } from '@react-three/postprocessing'
 import { BlendFunction, KernelSize } from 'postprocessing'
 
@@ -7,7 +6,7 @@ import { BlendFunction, KernelSize } from 'postprocessing'
  * Includes: Bloom, Noise, Vignette, and Outline for selected objects
  */
 const Effects = () => {
-    const { size } = useThree()
+    // const { size } = useThree()
 
     return (
         <EffectComposer

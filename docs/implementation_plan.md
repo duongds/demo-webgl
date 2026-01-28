@@ -214,6 +214,65 @@ demo-midu/
 - Phase 3: Complete gallery environment
 - Phase 4: Interactive paintings with detail view
 - Phase 5: Full polished experience
+- Phase 6: Reference fidelity polish (Footprints, Boiling Effect, Zoom)
+
+---
+
+### Phase 6: Reference Fidelity Polish (New)
+> **Goal**: Implement specific visual/behavioral features from the reference site
+
+#### Step 6.1: Visual Footprints
+- [ ] Create `Footprint` component (Mesh/Decal)
+- [ ] Update `useFootsteps` to spawn footprints on step
+- [ ] Implement fading/disappearing logic
+
+#### Step 6.2: Stylized "Boiling" Shader
+- [ ] Update `SketchMaterial` with time-based vertex/UV displacement
+- [ ] Create dark silhouette style for character
+- [ ] Add "ink splat" feel to movements
+
+#### Step 6.3: Responsive Camera & Interaction
+- [ ] Implement "Gallery Zoom" (transition to 2D view on interaction)
+- [ ] Add "Interaction Circles" on floor
+- [ ] Polish camera transitions between states
+
+### Phase 7: Character Model Design & Integration
+> **Goal**: Create a cute, hand-drawn character using procedural geometry
+
+#### Step 7.1: Procedural Character Construction (Completed)
+- [x] Build character using Three.js primitives (Spheres, Capsules)
+- [x] Implement "Cute/Short" proportions (Scale down, lower Y)
+- [x] Apply custom "Boiling" Sketch Material
+
+#### Step 7.2: Procedural Animation (Completed)
+- [x] Implement walk/run limb swing via code (`useFrame`)
+- [x] Add head/body bobbing for extra "cuteness" factor
+- [x] Sync animations with movement state from store
+
+#### Step 7.3: Future Polish (Optional/Note)
+- [ ] Option to find/import a custom GLB model if a more organic silhouette is needed
+- [ ] Add more "Ink" details (splatters on the character body)
+- [ ] Fine-tune physics/ik for limb movements
+
+---
+
+### Phase 8: Deployment & Hosting
+> **Goal**: Deploy the application to Vercel with a custom domain
+
+#### Step 8.1: Production Optimization (Completed)
+- [x] Perform production build (`yarn build`) to check for errors
+- [ ] Optimize 3D assets (GLB compression via gltf-pipeline)
+- [x] Ensure all environment variables are configured
+
+#### Step 8.2: Vercel Setup (Completed)
+- [x] Create `vercel.json` for SPA routing configuration
+- [x] Configure build settings (Build Command: `yarn build`, Output Directory: `dist`)
+- [ ] Set up continuous deployment from Git (GitHub/GitLab)
+
+#### Step 8.3: Domain Configuration
+- [ ] Connect custom domain: **midu-gallery.vercel.app**
+- [ ] Configure SSL certificates via Vercel
+- [ ] Perform final lighthouse performance audit on production URL
 
 ---
 

@@ -17,15 +17,17 @@ const Painting = ({ id, url, position, rotation, size = [2, 1.5], title = "Untit
     const registerPainting = useGameStore((state) => state.registerPainting)
 
     const worldPosition = useMemo(() => new THREE.Vector3(...position), [position])
+    const worldRotation = useMemo(() => new THREE.Euler(...rotation), [rotation])
 
     useEffect(() => {
         registerPainting({
             id,
             position: worldPosition,
+            rotation: worldRotation,
             title,
             url,
         })
-    }, [id, worldPosition, title, url, registerPainting])
+    }, [id, worldPosition, worldRotation, title, url, registerPainting])
 
     return (
         <group position={position} rotation={rotation}>
@@ -63,6 +65,32 @@ const Painting = ({ id, url, position, rotation, size = [2, 1.5], title = "Untit
                     {title}
                 </Text>
             )}
+
+            {/* Interaction Circle on the floor */}
+            <mesh
+                position={[0, -position[1] + 0.02, 1.5]}
+                rotation={[-Math.PI / 2, 0, 0]}
+            >
+                <ringGeometry args={[0.45, 0.5, 32]} />
+                <meshBasicMaterial
+                    color="white"
+                    transparent
+                    opacity={0.3}
+                    depthWrite={false}
+                />
+            </mesh>
+            <mesh
+                position={[0, -position[1] + 0.02, 1.5]}
+                rotation={[-Math.PI / 2, 0, 0]}
+            >
+                <circleGeometry args={[0.05, 16]} />
+                <meshBasicMaterial
+                    color="white"
+                    transparent
+                    opacity={0.5}
+                    depthWrite={false}
+                />
+            </mesh>
         </group>
     )
 }

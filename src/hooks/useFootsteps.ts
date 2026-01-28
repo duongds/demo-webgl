@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import * as THREE from 'three'
 import useAudioStore from '../stores/useAudioStore'
 import useGameStore from '../stores/useGameStore'
 
@@ -44,6 +45,8 @@ const useFootsteps = () => {
         })
     }, [effectiveVolume])
 
+    const leftStep = useRef(true)
+
     // Play footstep with round-robin selection
     const playFootstep = useCallback(() => {
         if (audioPool.current.length === 0 || isMuted) return
@@ -54,7 +57,22 @@ const useFootsteps = () => {
         
         // Alternate between sounds
         currentIndex.current = (currentIndex.current + 1) % audioPool.current.length
-    }, [isMuted])
+
+        // Add visual footprint
+        const { position, rotation } = useGameStore.getState().character
+        const addFootprint = useGameStore.getState().addFootprint
+        
+        // Calculate offset for left/right foot
+        const sideOffset = leftStep.current ? -0.2 : 0.2
+        const angle = rotation
+        const offsetX = Math.cos(angle) * sideOffset
+        const offsetZ = -Math.sin(angle) * sideOffset
+        
+        const footPos = position.clone().add(new THREE.Vector3(offsetX, 0.01, offsetZ))
+        addFootprint(footPos, rotation)
+        
+        leftStep.current = !leftStep.current
+    }, [isMuted, currentIndex])
 
     // Handle movement sound
     useEffect(() => {
