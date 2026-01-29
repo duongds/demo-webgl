@@ -1,6 +1,6 @@
 import { PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import useGameStore from '../../stores/useGameStore'
 
@@ -17,11 +17,8 @@ interface FollowCameraProps {
     offset?: [number, number, number]
     lookAtOffset?: [number, number, number]
     smoothness?: number
-    /** Room boundaries - camera will be constrained within these limits */
     bounds?: CameraBounds
-    /** Distance from wall at which camera starts adjusting */
     wallPadding?: number
-    /** Enable dynamic height adjustment when near walls */
     enableDynamicHeight?: boolean
 }
 
@@ -35,160 +32,140 @@ const DEFAULT_BOUNDS: CameraBounds = {
 }
 
 const FollowCamera = ({
-    offset = [0, 4, 8],
-    lookAtOffset = [0, 0, 0],
     smoothness = 5,
     bounds = DEFAULT_BOUNDS,
-    wallPadding = 3,
-    enableDynamicHeight = true,
 }: FollowCameraProps) => {
     const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
     const targetPosition = useRef(new THREE.Vector3())
-    const currentPosition = useRef(new THREE.Vector3(offset[0], offset[1], offset[2]))
+    const currentPosition = useRef(new THREE.Vector3(0, 4, 8))
     const lookAtTarget = useRef(new THREE.Vector3())
-    const adjustedOffset = useRef(new THREE.Vector3(offset[0], offset[1], offset[2]))
+    const currentFov = useRef(50)
+    const lastPaintingId = useRef<string | null>(null)
 
-    /**
-     * Clamp a value within min/max bounds
-     */
-    const clamp = (value: number, min: number, max: number): number => {
-        return Math.max(min, Math.min(max, value))
-    }
+    // 360 Orbit State
+    const mouseParams = useRef({
+        yaw: 0,
+        pitch: -0.2,
+        targetYaw: 0,
+        targetPitch: -0.2,
+        distance: 7,
+    })
 
-    /**
-     * Calculate proximity factor (0-1) based on distance to wall
-     * 0 = far from wall, 1 = at wall edge
-     */
-    const getWallProximity = (pos: number, min: number, max: number): number => {
-        const distToMin = pos - min
-        const distToMax = max - pos
-        const closestDist = Math.min(distToMin, distToMax)
+    const isPointerDown = useRef(false)
 
-        if (closestDist >= wallPadding) return 0
-        return 1 - (closestDist / wallPadding)
-    }
+    // Handle mouse rotation
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            const sensitivity = 0.003
 
-    /**
-     * Adjust camera offset based on room constraints
-     * - Reduces Z offset when near back wall to prevent clipping
-     * - Adjusts height when constrained
-     */
-    const calculateConstrainedOffset = (charPos: THREE.Vector3): THREE.Vector3 => {
-        let adjustedX = offset[0]
-        let adjustedY = offset[1]
-        let adjustedZ = offset[2]
+            // Orbiting functionality
+            if (isPointerDown.current) {
+                mouseParams.current.targetYaw -= e.movementX * sensitivity
+                mouseParams.current.targetPitch -= e.movementY * sensitivity
 
-        // Check if camera would go beyond back wall (positive Z)
-        const projectedZ = charPos.z + offset[2]
-        if (projectedZ > bounds.maxZ - 1) {
-            // Reduce Z offset progressively
-            const overflow = projectedZ - (bounds.maxZ - 1)
-            adjustedZ = offset[2] - overflow * 0.8
-            adjustedZ = Math.max(adjustedZ, 2) // Minimum Z offset
-
-            // Compensate with height when pulling camera closer
-            if (enableDynamicHeight) {
-                const compressionFactor = 1 - (adjustedZ / offset[2])
-                adjustedY = offset[1] + compressionFactor * 2
+                // Limit pitch to avoid flipping
+                mouseParams.current.targetPitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 3, mouseParams.current.targetPitch))
             }
         }
 
-        // Check front wall (negative Z)
-        const projectedFrontZ = charPos.z + (adjustedZ < 0 ? adjustedZ : -2)
-        if (projectedFrontZ < bounds.minZ + 1) {
-            // Character is near front wall, camera behind
-            adjustedZ = Math.max(adjustedZ, bounds.minZ + 1 - charPos.z + 2)
+        const handleMouseDown = () => { isPointerDown.current = true }
+        const handleMouseUp = () => { isPointerDown.current = false }
+
+        window.addEventListener('mousemove', handleMouseMove)
+        window.addEventListener('mousedown', handleMouseDown)
+        window.addEventListener('mouseup', handleMouseUp)
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('mousedown', handleMouseDown)
+            window.removeEventListener('mouseup', handleMouseUp)
         }
+    }, [])
 
-        // Check side walls and adjust X
-        const projectedX = charPos.x + offset[0]
-        if (projectedX < bounds.minX + 1) {
-            adjustedX = bounds.minX + 1 - charPos.x
-        } else if (projectedX > bounds.maxX - 1) {
-            adjustedX = bounds.maxX - 1 - charPos.x
-        }
-
-        // Dynamic height based on wall proximity
-        if (enableDynamicHeight) {
-            const xProximity = getWallProximity(charPos.x, bounds.minX, bounds.maxX)
-            const zProximity = getWallProximity(charPos.z, bounds.minZ, bounds.maxZ)
-            const maxProximity = Math.max(xProximity, zProximity)
-
-            // Increase height when near walls for better visibility
-            adjustedY += maxProximity * 1.5
-        }
-
-        // Clamp final height
-        adjustedY = clamp(adjustedY, bounds.minY, bounds.maxY)
-
-        return new THREE.Vector3(adjustedX, adjustedY, adjustedZ)
+    const clamp = (value: number, min: number, max: number): number => {
+        return Math.max(min, Math.min(max, value))
     }
 
     useFrame((state, delta) => {
         if (!cameraRef.current) return
 
-        // Get latest character position and selected painting from store
         const { character, selectedPainting } = useGameStore.getState()
         const characterPosition = character.position
         const clampedDelta = Math.min(delta, 0.1)
 
         if (selectedPainting) {
             // ZOOMED MODE: Focus on painting
-            // Calculate a position in front of the painting
             const zoomDistance = 3.5
-            // Create a vector pointing outward from the painting's surface
             const offsetDir = new THREE.Vector3(0, 0, 1).applyEuler(selectedPainting.rotation)
 
             targetPosition.current.copy(selectedPainting.position).add(offsetDir.multiplyScalar(zoomDistance))
-            // Ensure camera is at a good height
             targetPosition.current.y = selectedPainting.position.y
-
             lookAtTarget.current.copy(selectedPainting.position)
 
-            // Speed up movement during zoom for snappiness
-            const zoomSmoothness = smoothness * 1.5
+            const dist = currentPosition.current.distanceTo(targetPosition.current)
+            const zoomSmoothness = smoothness * (dist > 1 ? 2.5 : 1.5)
+
+            const targetFov = dist > 0.5 ? 55 : 45
+            currentFov.current = THREE.MathUtils.lerp(currentFov.current, targetFov, clampedDelta * 4)
+
             currentPosition.current.lerp(targetPosition.current, zoomSmoothness * clampedDelta)
+
+            if (lastPaintingId.current !== selectedPainting.id) {
+                lastPaintingId.current = selectedPainting.id
+                currentFov.current = 65
+            }
         } else {
-            // NORMAL MODE: Follow character
+            // 360 ORBIT MODE
+            if (lastPaintingId.current) {
+                lastPaintingId.current = null
+            }
+            currentFov.current = THREE.MathUtils.lerp(currentFov.current, 50, clampedDelta * 5)
 
-            // Calculate constrained offset based on character position
-            const newOffset = calculateConstrainedOffset(characterPosition)
+            // Smoothly interpolate rotation params
+            mouseParams.current.yaw = THREE.MathUtils.lerp(mouseParams.current.yaw, mouseParams.current.targetYaw, clampedDelta * smoothness)
+            mouseParams.current.pitch = THREE.MathUtils.lerp(mouseParams.current.pitch, mouseParams.current.targetPitch, clampedDelta * smoothness)
 
-            // Smooth the offset changes for fluid camera movement
-            adjustedOffset.current.lerp(newOffset, smoothness * clampedDelta * 0.5)
+            // Calculate position on a sphere around the character
+            const distance = mouseParams.current.distance
+            const phi = Math.PI / 2 - mouseParams.current.pitch
+            const theta = mouseParams.current.yaw
 
-            // Calculate target camera position (character position + constrained offset)
             targetPosition.current.set(
-                characterPosition.x + adjustedOffset.current.x,
-                characterPosition.y + adjustedOffset.current.y,
-                characterPosition.z + adjustedOffset.current.z
+                characterPosition.x + distance * Math.sin(phi) * Math.sin(theta),
+                characterPosition.y + distance * Math.cos(phi) + 1.2, // Offset for eye level
+                characterPosition.z + distance * Math.sin(phi) * Math.cos(theta)
             )
 
-            // Apply final boundary constraints to target position
+            // Constraints for room bounds (simple)
             targetPosition.current.x = clamp(targetPosition.current.x, bounds.minX, bounds.maxX)
-            targetPosition.current.y = clamp(targetPosition.current.y, bounds.minY, bounds.maxY)
             targetPosition.current.z = clamp(targetPosition.current.z, bounds.minZ, bounds.maxZ)
 
-            // Smooth camera movement using lerp
+            // Smooth camera movement
             currentPosition.current.lerp(targetPosition.current, smoothness * clampedDelta)
 
-            // Calculate look-at target (always follows character)
+            // Look-at target is the character
             lookAtTarget.current.set(
-                characterPosition.x + lookAtOffset[0],
-                characterPosition.y + lookAtOffset[1],
-                characterPosition.z + lookAtOffset[2]
+                characterPosition.x,
+                characterPosition.y + 1.0,
+                characterPosition.z
             )
         }
 
-        // Update camera position
+        // Update camera position and FOV
         cameraRef.current.position.copy(currentPosition.current)
+        cameraRef.current.fov = currentFov.current
+        cameraRef.current.updateProjectionMatrix()
 
         // Make camera look at target
         cameraRef.current.lookAt(lookAtTarget.current)
 
         // Sync main camera
         state.camera.position.copy(cameraRef.current.position)
+        if (state.camera instanceof THREE.PerspectiveCamera) {
+            state.camera.fov = cameraRef.current.fov
+            state.camera.updateProjectionMatrix()
+        }
         state.camera.lookAt(lookAtTarget.current)
     })
 
@@ -199,7 +176,6 @@ const FollowCamera = ({
             fov={50}
             near={0.1}
             far={1000}
-            position={[offset[0], offset[1], offset[2]]}
         />
     )
 }

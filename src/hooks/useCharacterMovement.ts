@@ -41,15 +41,29 @@ const useCharacterMovement = (
     const isMoving = input.x !== 0 || input.z !== 0
     const isRunning = isMoving && (isKeyPressed('shift'))
 
-    // Apply movement
     if (isMoving) {
+      // Get camera direction for movement relative to view
+      const { camera } = _
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion)
+      const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion)
+      
+      // Flatten vectors to XZ plane
+      forward.y = 0
+      right.y = 0
+      forward.normalize()
+      right.normalize()
+
+      // Calculate move direction
+      const moveDir = forward.multiplyScalar(-input.z).add(right.multiplyScalar(input.x))
+      moveDir.normalize()
+
       // Calculate target rotation based on movement direction
-      targetRotation.current = Math.atan2(input.x, input.z)
+      targetRotation.current = Math.atan2(moveDir.x, moveDir.z)
 
       // Apply velocity (extra boost if running)
       const currentSpeed = isRunning ? speed * 1.8 : speed
-      velocity.current.x += input.x * currentSpeed * clampedDelta
-      velocity.current.z += input.z * currentSpeed * clampedDelta
+      velocity.current.x += moveDir.x * currentSpeed * clampedDelta
+      velocity.current.z += moveDir.z * currentSpeed * clampedDelta
     }
 
     // Apply friction

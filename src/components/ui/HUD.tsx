@@ -13,25 +13,45 @@ const HUD = () => {
     const nearestPainting = useGameStore((state) => state.nearestPainting)
     const selectedPainting = useGameStore((state) => state.selectedPainting)
     const setSelectedPainting = useGameStore((state) => state.setSelectedPainting)
+    const paintings = useGameStore((state) => state.paintings)
     const characterType = useGameStore((state) => state.characterType)
     const setCharacterType = useGameStore((state) => state.setCharacterType)
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Using e.code 'Enter' is more robust than e.key
             if ((e.code === 'Enter' || e.key === 'Enter') && nearestPainting && !selectedPainting) {
-                e.preventDefault() // Prevent any default action
-                console.log('Action: Opening painting via ENTER key')
+                e.preventDefault()
                 setSelectedPainting(nearestPainting)
+            }
+
+            if (selectedPainting) {
+                if (e.key === 'ArrowRight') {
+                    handleNext()
+                } else if (e.key === 'ArrowLeft') {
+                    handlePrev()
+                } else if (e.key === 'Escape') {
+                    setSelectedPainting(null)
+                }
             }
         }
 
-        // Ensure window is focused to capture keys
-        window.focus()
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [nearestPainting, selectedPainting, setSelectedPainting, paintings])
 
-        window.addEventListener('keydown', handleKeyDown, true) // Added capture phase
-        return () => window.removeEventListener('keydown', handleKeyDown, true)
-    }, [nearestPainting, selectedPainting, setSelectedPainting])
+    const handleNext = () => {
+        if (!selectedPainting || paintings.length === 0) return
+        const currentIndex = paintings.findIndex(p => p.id === selectedPainting.id)
+        const nextIndex = (currentIndex + 1) % paintings.length
+        setSelectedPainting(paintings[nextIndex])
+    }
+
+    const handlePrev = () => {
+        if (!selectedPainting || paintings.length === 0) return
+        const currentIndex = paintings.findIndex(p => p.id === selectedPainting.id)
+        const prevIndex = (currentIndex - 1 + paintings.length) % paintings.length
+        setSelectedPainting(paintings[prevIndex])
+    }
 
     const handlePromptClick = () => {
         if (nearestPainting) {
@@ -66,28 +86,64 @@ const HUD = () => {
                         </DialogDescription>
                     </DialogHeader>
                     {selectedPainting && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                            <div className="aspect-[4/3] rounded-lg overflow-hidden border border-slate-800 bg-black/50">
-                                <img
-                                    src={selectedPainting.url}
-                                    alt={selectedPainting.title}
-                                    className="w-full h-full object-cover"
-                                />
+                        <div className="relative">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                                <div className="group relative aspect-[4/3] rounded-lg overflow-hidden border border-slate-800 bg-black/50">
+                                    <img
+                                        key={selectedPainting.id}
+                                        src={selectedPainting.url}
+                                        alt={selectedPainting.title}
+                                        className="w-full h-full object-cover transition-all duration-700 animate-in fade-in slide-in-from-right-4"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                                        <p className="text-[10px] font-mono text-white/60 tracking-widest uppercase">HD View Active</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-4">
+                                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+                                        <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Description</h4>
+                                        <p className="mt-2 text-slate-300 leading-relaxed">
+                                            This is a placeholder description for <strong>{selectedPainting.title}</strong>.
+                                            In a real application, this would contain information about the artist,
+                                            technique, and history of the piece.
+                                        </p>
+                                    </div>
+                                    <div className="mt-auto pt-4 border-t border-slate-800 flex justify-between items-center">
+                                        <p className="text-xs text-slate-500 font-mono">
+                                            ID: {selectedPainting.id}
+                                        </p>
+                                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                                            <kbd className="px-1.5 py-0.5 bg-slate-800 rounded">ESC</kbd>
+                                            <span>to close</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex flex-col gap-4">
-                                <div>
-                                    <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Description</h4>
-                                    <p className="mt-2 text-slate-300">
-                                        This is a placeholder description for <strong>{selectedPainting.title}</strong>.
-                                        In a real application, this would contain information about the artist,
-                                        technique, and history of the piece.
-                                    </p>
+
+                            {/* Navigation Arrows inside Dialog */}
+                            <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-800/50">
+                                <button
+                                    onClick={handlePrev}
+                                    className="px-4 py-2 flex items-center gap-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors group"
+                                >
+                                    <span className="group-hover:-translate-x-1 transition-transform">←</span>
+                                    <span>Previous</span>
+                                </button>
+                                <div className="flex gap-1">
+                                    {paintings.map((p) => (
+                                        <div
+                                            key={p.id}
+                                            className={`h-1 w-4 rounded-full transition-all ${p.id === selectedPainting.id ? 'bg-white w-8' : 'bg-slate-800'}`}
+                                        />
+                                    ))}
                                 </div>
-                                <div className="mt-auto pt-4 border-t border-slate-800">
-                                    <p className="text-xs text-slate-500 font-mono">
-                                        ID: {selectedPainting.id}
-                                    </p>
-                                </div>
+                                <button
+                                    onClick={handleNext}
+                                    className="px-4 py-2 flex items-center gap-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors group"
+                                >
+                                    <span>Next</span>
+                                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                </button>
                             </div>
                         </div>
                     )}
