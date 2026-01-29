@@ -129,7 +129,7 @@ const HUD = () => {
 
             {/* Title */}
             <div className="absolute top-6 right-6 text-right">
-                <h1 className="text-white/90 text-2xl font-extralight tracking-[0.2em] uppercase">
+                <h1 className="text-white/90 text-lg font-extralight tracking-[0.2em] uppercase">
                     Virtual Gallery
                 </h1>
                 <div className="h-px w-24 bg-gradient-to-l from-white/40 to-transparent ml-auto mt-2" />

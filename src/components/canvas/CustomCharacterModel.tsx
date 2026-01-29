@@ -64,12 +64,13 @@ const CustomCharacterModel = () => {
         const walkAmplitude = isRunning ? 0.4 : 0.25
 
         if (isMoving) {
-            // Body bobbing
-            group.current.position.y = Math.abs(Math.sin(time * walkSpeed)) * 0.1 - 0.6
+            // Body bobbing - happens twice per full step cycle (one per foot)
+            const bob = Math.abs(Math.sin(time * walkSpeed))
+            group.current.position.y = -0.55 + bob * 0.06
 
-            // Head bobbing
+            // Head bobbing matching body
             if (head.current) {
-                head.current.position.y = 0.8 + Math.sin(time * walkSpeed * 1.2) * 0.02
+                head.current.position.y = 0.8 + bob * 0.015
             }
 
             // Limb movement
@@ -78,32 +79,28 @@ const CustomCharacterModel = () => {
             if (leftLeg.current) leftLeg.current.rotation.x = angle
             if (rightLeg.current) rightLeg.current.rotation.x = -angle
 
-            if (leftArm.current) leftArm.current.rotation.x = -angle * 1.5
-            if (rightArm.current) rightArm.current.rotation.x = angle * 1.5
+            // Arms move opposite to legs
+            if (leftArm.current) leftArm.current.rotation.x = -angle * 1.3
+            if (rightArm.current) rightArm.current.rotation.x = angle * 1.3
         } else {
-            // Idle breathing
-            group.current.position.y = -0.6
+            // Idle state
+            group.current.position.y = -0.55
             const idleSpeed = 2
             if (head.current) {
-                head.current.position.y = 0.8 + Math.sin(time * idleSpeed) * 0.01
+                head.current.position.y = 0.8 + Math.sin(time * idleSpeed) * 0.005
             }
 
             // Reset limbs
-            if (leftLeg.current) leftLeg.current.rotation.x = 0
-            if (rightLeg.current) rightLeg.current.rotation.x = 0
-            if (leftArm.current) leftArm.current.rotation.x = 0
-            if (rightArm.current) rightArm.current.rotation.x = 0
+            if (leftLeg.current) leftLeg.current.rotation.x = THREE.MathUtils.lerp(leftLeg.current.rotation.x, 0, 0.1)
+            if (rightLeg.current) rightLeg.current.rotation.x = THREE.MathUtils.lerp(rightLeg.current.rotation.x, 0, 0.1)
+            if (leftArm.current) leftArm.current.rotation.x = THREE.MathUtils.lerp(leftArm.current.rotation.x, 0.2, 0.1)
+            if (rightArm.current) rightArm.current.rotation.x = THREE.MathUtils.lerp(rightArm.current.rotation.x, 0.2, 0.1)
         }
         // Shadow dynamic behavior
         if (shadowRef.current) {
             const bodyY = group.current.position.y
-            // bodyY goes from -0.6 (idle/low) to -0.5 (bobbing high)
-            // Height above floor influence: higher body = smaller shadow
-            const heightFactor = 1.0 - (bodyY + 0.6) * 2.0
-            const baseScale = isMoving ? 1.1 : 1.0
-            const pulseScale = baseScale * (0.95 + Math.sin(time * 5) * 0.05) // Subtle constant pulse
-
-            shadowRef.current.scale.setScalar(pulseScale * heightFactor)
+            const heightFactor = 1.0 - (bodyY + 0.6) * 1.5
+            shadowRef.current.scale.setScalar(1.0 * heightFactor)
             if (shadowRef.current.material instanceof THREE.MeshBasicMaterial) {
                 shadowRef.current.material.opacity = 0.15 * heightFactor
             }
@@ -111,65 +108,61 @@ const CustomCharacterModel = () => {
     })
 
     return (
-        <group ref={group} scale={0.7} position={[0, -0.6, 0]}> {/* Scale down for "cute" size */}
+        <group ref={group} scale={0.75} position={[0, -0.55, 0]}>
             {/* Head & Neck */}
             <group ref={head} position={[0, 0.85, 0]}>
                 <mesh material={material}>
-                    <sphereGeometry args={[0.26, 16, 16]} />
+                    <sphereGeometry args={[0.22, 16, 16]} />
                 </mesh>
-                <mesh position={[0, -0.22, 0]} material={material}>
-                    <cylinderGeometry args={[0.04, 0.05, 0.1, 8]} />
+                <mesh position={[0, -0.2, 0]} material={material}>
+                    <cylinderGeometry args={[0.035, 0.04, 0.08, 8]} />
                 </mesh>
             </group>
 
-            {/* Torso (Chest/Shoulders) */}
-            <mesh position={[0, 0.55, 0]} material={material}>
-                <capsuleGeometry args={[0.16, 0.25, 4, 10]} />
+            {/* Torso */}
+            <mesh position={[0, 0.52, 0]} material={material}>
+                <capsuleGeometry args={[0.16, 0.2, 4, 10]} />
             </mesh>
 
             {/* Hips */}
-            <mesh position={[0, 0.35, 0]} material={material}>
+            <mesh position={[0, 0.38, 0]} material={material}>
                 <sphereGeometry args={[0.15, 12, 12]} />
             </mesh>
 
-            {/* ... Other limbs ... */}
-            <group ref={leftArm} position={[-0.2, 0.65, 0]}>
-                <mesh position={[0, -0.15, 0]} material={material}>
+            {/* Arms - Lengthened to 0.25 */}
+            <group ref={leftArm} position={[-0.2, 0.62, 0]}>
+                <mesh position={[0, -0.18, 0]} material={material}>
                     <capsuleGeometry args={[0.05, 0.25, 4, 8]} />
                 </mesh>
             </group>
 
-            <group ref={rightArm} position={[0.2, 0.65, 0]}>
-                <mesh position={[0, -0.15, 0]} material={material}>
+            <group ref={rightArm} position={[0.2, 0.62, 0]}>
+                <mesh position={[0, -0.18, 0]} material={material}>
                     <capsuleGeometry args={[0.05, 0.25, 4, 8]} />
                 </mesh>
             </group>
 
-            <group ref={leftLeg} position={[-0.08, 0.28, 0]}>
+
+            <group ref={leftLeg} position={[-0.08, 0.3, 0]}>
                 <mesh position={[0, -0.2, 0]} material={material}>
                     <capsuleGeometry args={[0.07, 0.35, 4, 8]} />
                 </mesh>
             </group>
 
-            <group ref={rightLeg} position={[0.08, 0.28, 0]}>
+            <group ref={rightLeg} position={[0.08, 0.3, 0]}>
                 <mesh position={[0, -0.2, 0]} material={material}>
                     <capsuleGeometry args={[0.07, 0.35, 4, 8]} />
                 </mesh>
             </group>
 
-            {/* Dynamic Blob Shadow */}
+            {/* Shadow */}
             <mesh
                 ref={shadowRef as any}
-                position={[0, -0.6, 0]}
+                position={[0, -0.45, 0]}
                 rotation={[-Math.PI / 2, 0, 0]}
             >
                 <circleGeometry args={[0.3, 32]} />
-                <meshBasicMaterial
-                    color="black"
-                    transparent
-                    opacity={0.15}
-                    depthWrite={false}
-                />
+                <meshBasicMaterial color="black" transparent opacity={0.15} depthWrite={false} />
             </mesh>
         </group>
     )
