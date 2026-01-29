@@ -13,6 +13,8 @@ const HUD = () => {
     const nearestPainting = useGameStore((state) => state.nearestPainting)
     const selectedPainting = useGameStore((state) => state.selectedPainting)
     const setSelectedPainting = useGameStore((state) => state.setSelectedPainting)
+    const characterType = useGameStore((state) => state.characterType)
+    const setCharacterType = useGameStore((state) => state.setCharacterType)
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -114,12 +116,32 @@ const HUD = () => {
                 </div>
             </div>
 
-            {/* Simple status indicator instead of full debug info */}
-            <div className="absolute top-4 left-4 flex flex-col gap-2">
+            {/* Status & Character Selector */}
+            <div className="absolute top-4 left-4 flex flex-col gap-3">
                 <div className="bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10 text-white/70 text-[10px] font-mono flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${isMoving ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`} />
                     {isMoving ? 'EXPLORING' : 'IDLE'}
                 </div>
+
+                {/* Character Selection */}
+                <div className="bg-black/60 backdrop-blur-md px-2 py-2 rounded-2xl border border-white/10 flex flex-col gap-2 pointer-events-auto">
+                    <p className="text-[10px] text-white/40 font-mono text-center uppercase tracking-widest px-2">Character</p>
+                    <div className="flex gap-1">
+                        <button
+                            onClick={() => setCharacterType('human')}
+                            className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-bold transition-all ${characterType === 'human' ? 'bg-white text-black underline underline-offset-4' : 'text-white/60 hover:bg-white/5'}`}
+                        >
+                            HUMAN
+                        </button>
+                        <button
+                            onClick={() => setCharacterType('bear')}
+                            className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-bold transition-all ${characterType === 'bear' ? 'bg-white text-black underline underline-offset-4' : 'text-white/60 hover:bg-white/5'}`}
+                        >
+                            BEAR
+                        </button>
+                    </div>
+                </div>
+
                 {nearestPainting && (
                     <div className="bg-amber-500/20 backdrop-blur-sm px-4 py-1 rounded-full border border-amber-500/30 text-amber-200 text-[9px] font-bold animate-pulse">
                         NEAR: {nearestPainting.title.toUpperCase()}

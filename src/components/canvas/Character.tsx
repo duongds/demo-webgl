@@ -6,11 +6,14 @@ import useCharacterMovement from '../../hooks/useCharacterMovement'
 import useFootsteps from '../../hooks/useFootsteps'
 import useGameStore from '../../stores/useGameStore'
 
+import BearModel from './BearModel'
 import CustomCharacterModel from './CustomCharacterModel'
 
 const Character = () => {
     const groupRef = useRef<THREE.Group>(null)
-    // Initialize movement, but use store directly in useFrame for absolute sync
+    const characterType = useGameStore((state) => state.characterType)
+
+    // Initialize movement
     useCharacterMovement({
         speed: 8,
         friction: 0.88,
@@ -32,11 +35,14 @@ const Character = () => {
         <group ref={groupRef}>
             {/* Wrap with Select for outline effect */}
             <Select enabled>
-                <CustomCharacterModel />
+                {characterType === 'human' ? (
+                    <CustomCharacterModel />
+                ) : (
+                    <BearModel />
+                )}
             </Select>
         </group>
     )
 }
 
 export default Character
-

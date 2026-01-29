@@ -24,6 +24,7 @@ interface GameState {
   paintings: PaintingData[]
   nearestPainting: PaintingData | null
   selectedPainting: PaintingData | null
+  characterType: 'human' | 'bear'
   
   // Input State
   keys: {
@@ -48,6 +49,7 @@ interface GameState {
   registerPainting: (painting: PaintingData) => void
   setNearestPainting: (painting: PaintingData | null) => void
   setSelectedPainting: (painting: PaintingData | null) => void
+  setCharacterType: (type: 'human' | 'bear') => void
   setKeys: (keys: Partial<GameState['keys']>) => void
   addFootprint: (position: THREE.Vector3, rotation: number) => void
   updateFootprints: (delta: number) => void
@@ -66,6 +68,7 @@ const useGameStore = create<GameState>((set) => ({
   paintings: [],
   nearestPainting: null,
   selectedPainting: null,
+  characterType: 'human',
   keys: {
     forward: false,
     backward: false,
@@ -116,6 +119,9 @@ const useGameStore = create<GameState>((set) => ({
 
   setSelectedPainting: (painting) =>
     set({ selectedPainting: painting }),
+
+  setCharacterType: (type) =>
+    set({ characterType: type }),
 
   setKeys: (keys) =>
     set((state) => ({
