@@ -63,7 +63,10 @@ const useFootsteps = () => {
         const addFootprint = useGameStore.getState().addFootprint
         
         // Calculate offset for left/right foot
-        const sideOffset = leftStep.current ? -0.2 : 0.2
+        // Adjusted for small robot scale (0.2 -> 0.4 effective width?)
+        // Robot scale 0.2 means it's very small. 0.2 width is huge for it.
+        // Let's try 0.08
+        const sideOffset = leftStep.current ? -0.08 : 0.08
         const angle = rotation
         const offsetX = Math.cos(angle) * sideOffset
         const offsetZ = -Math.sin(angle) * sideOffset

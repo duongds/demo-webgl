@@ -195,6 +195,12 @@ const HUD = () => {
                         >
                             BEAR
                         </button>
+                        <button
+                            onClick={() => setCharacterType('robot')}
+                            className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-bold transition-all ${characterType === 'robot' ? 'bg-white text-black underline underline-offset-4' : 'text-white/60 hover:bg-white/5'}`}
+                        >
+                            ROBOT
+                        </button>
                     </div>
                 </div>
 

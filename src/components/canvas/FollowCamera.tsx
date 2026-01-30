@@ -133,7 +133,7 @@ const FollowCamera = ({
 
             targetPosition.current.set(
                 characterPosition.x + distance * Math.sin(phi) * Math.sin(theta),
-                characterPosition.y + distance * Math.cos(phi) + 1.2, // Offset for eye level
+                characterPosition.y + distance * Math.cos(phi) + 2.2, // Increased offset for eye level (was 1.2)
                 characterPosition.z + distance * Math.sin(phi) * Math.cos(theta)
             )
 
@@ -147,7 +147,7 @@ const FollowCamera = ({
             // Look-at target is the character
             lookAtTarget.current.set(
                 characterPosition.x,
-                characterPosition.y + 1.0,
+                characterPosition.y + 2, // Increased look-at height (was 1.0)
                 characterPosition.z
             )
         }
