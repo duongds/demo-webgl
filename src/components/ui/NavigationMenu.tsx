@@ -1,14 +1,16 @@
 import { Info, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router'
+import useAudioManager from '../../hooks/useAudioManager'
 
 interface NavLinkProps {
     to: string
     children: React.ReactNode
     onClick?: () => void
+    onHover?: () => void
 }
 
-const NavLink = ({ to, children, onClick }: NavLinkProps) => {
+const NavLink = ({ to, children, onClick, onHover }: NavLinkProps) => {
     const location = useLocation()
     const isActive = location.pathname === to
 
@@ -16,6 +18,7 @@ const NavLink = ({ to, children, onClick }: NavLinkProps) => {
         <Link
             to={to}
             onClick={onClick}
+            onMouseEnter={onHover}
             className={`
                 relative px-6 py-3 text-sm uppercase tracking-[0.3em] 
                 transition-all duration-300 group
@@ -42,12 +45,17 @@ interface NavigationMenuProps {
 
 const NavigationMenu = ({ variant = 'floating' }: NavigationMenuProps) => {
     const [isOpen, setIsOpen] = useState(false)
+    const { playSfx } = useAudioManager()
+
+    const handleHover = () => playSfx('uiHover')
+    const handleClick = () => playSfx('uiClick')
 
     if (variant === 'inline') {
         return (
             <nav className="flex items-center gap-2">
-                <NavLink to="/">Gallery</NavLink>
-                <NavLink to="/about">About</NavLink>
+                <NavLink to="/" onHover={handleHover} onClick={handleClick}>Gallery</NavLink>
+                <NavLink to="/story" onHover={handleHover} onClick={handleClick}>Story</NavLink>
+                <NavLink to="/about" onHover={handleHover} onClick={handleClick}>About</NavLink>
             </nav>
         )
     }
@@ -56,7 +64,11 @@ const NavigationMenu = ({ variant = 'floating' }: NavigationMenuProps) => {
         <>
             {/* Floating Menu Button */}
             <button
-                onClick={() => setIsOpen(true)}
+                onClick={() => {
+                    setIsOpen(true)
+                    handleClick()
+                }}
+                onMouseEnter={handleHover}
                 className="
                     fixed top-6 right-6 z-50 
                     w-12 h-12 rounded-full 
@@ -83,7 +95,11 @@ const NavigationMenu = ({ variant = 'floating' }: NavigationMenuProps) => {
             >
                 {/* Close Button */}
                 <button
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                        setIsOpen(false)
+                        handleClick()
+                    }}
+                    onMouseEnter={handleHover}
                     className="
                         absolute top-6 right-6
                         w-12 h-12 rounded-full
@@ -108,7 +124,11 @@ const NavigationMenu = ({ variant = 'floating' }: NavigationMenuProps) => {
                 <nav className="flex flex-col items-center gap-2">
                     <Link
                         to="/"
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => {
+                            setIsOpen(false)
+                            handleClick()
+                        }}
+                        onMouseEnter={handleHover}
                         className="
                             text-4xl md:text-5xl font-extralight tracking-[0.2em] uppercase
                             text-white/40 hover:text-white
@@ -120,8 +140,29 @@ const NavigationMenu = ({ variant = 'floating' }: NavigationMenuProps) => {
                         Home
                     </Link>
                     <Link
+                        to="/story"
+                        onClick={() => {
+                            setIsOpen(false)
+                            handleClick()
+                        }}
+                        onMouseEnter={handleHover}
+                        className="
+                            text-4xl md:text-5xl font-extralight tracking-[0.2em] uppercase
+                            text-white/40 hover:text-white
+                            transition-all duration-300
+                            hover:tracking-[0.3em]
+                            py-4
+                        "
+                    >
+                        Story
+                    </Link>
+                    <Link
                         to="/about"
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => {
+                            setIsOpen(false)
+                            handleClick()
+                        }}
+                        onMouseEnter={handleHover}
                         className="
                             text-4xl md:text-5xl font-extralight tracking-[0.2em] uppercase
                             text-white/40 hover:text-white

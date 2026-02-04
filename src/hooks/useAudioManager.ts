@@ -3,15 +3,15 @@ import useAudioStore from '../stores/useAudioStore'
 
 // Free ambient music URLs (royalty-free)
 const AMBIENT_TRACKS = [
-    'https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3', // Calm ambient
+    'https://assets.mixkit.co/music/466/466.mp3', // Calm ambient
 ]
 
 // Sound effect URLs
 const SFX = {
     footstep1: 'https://assets.mixkit.co/active_storage/sfx/2092/2092-preview.mp3',
     footstep2: 'https://assets.mixkit.co/active_storage/sfx/2093/2093-preview.mp3',
-    uiClick: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
-    uiHover: 'https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3',
+    uiClick: 'https://assets.mixkit.co/active_storage/sfx/900/900-preview.mp3',
+    uiHover: 'https://assets.mixkit.co/active_storage/sfx/1127/1127-preview.mp3',
 }
 
 /**

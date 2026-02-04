@@ -1,5 +1,6 @@
 import { Music, Music2, Volume2, VolumeX } from 'lucide-react'
 import { useState } from 'react'
+import useAudioManager from '../../hooks/useAudioManager'
 import useAudioStore from '../../stores/useAudioStore'
 
 /**
@@ -8,6 +9,7 @@ import useAudioStore from '../../stores/useAudioStore'
  */
 const AudioControls = () => {
     const [isExpanded, setIsExpanded] = useState(false)
+    const { playSfx } = useAudioManager()
     const {
         masterVolume,
         musicVolume,
@@ -26,8 +28,8 @@ const AudioControls = () => {
             {/* Expanded Panel */}
             <div
                 className={`absolute bottom-14 right-0 w-64 transition-all duration-300 ease-out ${isExpanded
-                        ? 'opacity-100 translate-y-0 pointer-events-auto'
-                        : 'opacity-0 translate-y-4 pointer-events-none'
+                    ? 'opacity-100 translate-y-0 pointer-events-auto'
+                    : 'opacity-0 translate-y-4 pointer-events-none'
                     }`}
             >
                 <div className="bg-black/80 backdrop-blur-xl rounded-2xl border border-white/10 p-5 shadow-2xl">
@@ -99,10 +101,14 @@ const AudioControls = () => {
                     {/* Toggle Buttons */}
                     <div className="flex gap-2">
                         <button
-                            onClick={toggleMusic}
+                            onClick={() => {
+                                toggleMusic()
+                                playSfx('uiClick')
+                            }}
+                            onMouseEnter={() => playSfx('uiHover')}
                             className={`flex-1 py-2 px-3 rounded-lg text-xs uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-2 ${isMusicPlaying
-                                    ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                                    : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
+                                ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                                : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
                                 }`}
                         >
                             {isMusicPlaying ? <Music2 size={14} /> : <Music size={14} />}
@@ -114,8 +120,15 @@ const AudioControls = () => {
 
             {/* Toggle Button */}
             <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                onDoubleClick={toggleMute}
+                onClick={() => {
+                    setIsExpanded(!isExpanded)
+                    playSfx('uiClick')
+                }}
+                onMouseEnter={() => playSfx('uiHover')}
+                onDoubleClick={() => {
+                    toggleMute()
+                    playSfx('uiClick')
+                }}
                 className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300
                            backdrop-blur-xl border shadow-lg ${isMuted
                         ? 'bg-red-500/20 border-red-500/30 text-red-400'

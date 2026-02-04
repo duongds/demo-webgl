@@ -276,6 +276,32 @@ demo-midu/
 
 ---
 
+### Phase 9: Character Story Experience (Completed)
+> **Goal**: Create an immersive, scroll-driven storytelling page transferring from 2D ink style to a 3D flying island
+
+#### Step 9.1: Story Page Foundation
+- [x] Create `/story` route and page structure
+- [x] Implement ScrollControls for timeline-based navigation
+- [x] Integrate standard UI components (Navigation, Audio)
+
+#### Step 9.2: 2D Ink Landing Integration
+- [x] Build `InkLanding` component with Japanese ink aesthetic
+- [x] Implement "Boiling" animation effect for SVG elements
+- [x] Create seamless fade-out transition to 3D scene
+
+#### Step 9.3: 3D Scene Composition
+- [x] **Floating Island**: Modeled rock base, grass top, and glowing runes (`StoryIsland`)
+- [x] **Atmosphere**: Animated cherry blossom tree and falling petals (`CherryBlossomTree`, `PetalParticles`)
+- [x] **Water Surface**: Procedural water floor with ripples and reflections (`WaterPlane`)
+- [x] **Cinematography**: Scroll-driven camera path (`ScrollCamera`)
+
+#### Step 9.4: Character Integration
+- [x] Adapt 3D character for static/idle presentation (`StoryCharacter`)
+- [x] Position character on the floating island
+- [x] Ensure seamless visual transition from the 2D silhouette to 3D model
+
+---
+
 ## 🚀 Getting Started
 
 Khi bạn approve kế hoạch này, tôi sẽ bắt đầu với **Phase 1: Foundation**:

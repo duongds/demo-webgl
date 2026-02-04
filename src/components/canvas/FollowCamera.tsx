@@ -46,9 +46,9 @@ const FollowCamera = ({
     // 360 Orbit State
     const mouseParams = useRef({
         yaw: 0,
-        pitch: -0.2,
+        pitch: 0,
         targetYaw: 0,
-        targetPitch: -0.2,
+        targetPitch: 0,
         distance: 7,
     })
 

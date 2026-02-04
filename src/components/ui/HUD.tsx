@@ -6,6 +6,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { useEffect } from 'react'
+import useAudioManager from '../../hooks/useAudioManager'
 import useGameStore from '../../stores/useGameStore'
 
 const HUD = () => {
@@ -17,11 +18,14 @@ const HUD = () => {
     const characterType = useGameStore((state) => state.characterType)
     const setCharacterType = useGameStore((state) => state.setCharacterType)
 
+    const { playSfx } = useAudioManager()
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.code === 'Enter' || e.key === 'Enter') && nearestPainting && !selectedPainting) {
                 e.preventDefault()
                 setSelectedPainting(nearestPainting)
+                playSfx('uiClick')
             }
 
             if (selectedPainting) {
@@ -31,15 +35,17 @@ const HUD = () => {
                     handlePrev()
                 } else if (e.key === 'Escape') {
                     setSelectedPainting(null)
+                    playSfx('uiClick')
                 }
             }
         }
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [nearestPainting, selectedPainting, setSelectedPainting, paintings])
+    }, [nearestPainting, selectedPainting, setSelectedPainting, paintings, playSfx])
 
     const handleNext = () => {
+        playSfx('uiClick')
         if (!selectedPainting || paintings.length === 0) return
         const currentIndex = paintings.findIndex(p => p.id === selectedPainting.id)
         const nextIndex = (currentIndex + 1) % paintings.length
@@ -47,6 +53,7 @@ const HUD = () => {
     }
 
     const handlePrev = () => {
+        playSfx('uiClick')
         if (!selectedPainting || paintings.length === 0) return
         const currentIndex = paintings.findIndex(p => p.id === selectedPainting.id)
         const prevIndex = (currentIndex - 1 + paintings.length) % paintings.length
@@ -55,6 +62,7 @@ const HUD = () => {
 
     const handlePromptClick = () => {
         if (nearestPainting) {
+            playSfx('uiClick')
             console.log('Opening painting via CLICK:', nearestPainting.title)
             setSelectedPainting(nearestPainting)
         }
@@ -66,6 +74,7 @@ const HUD = () => {
             {nearestPainting && !selectedPainting && (
                 <div
                     onClick={handlePromptClick}
+                    onMouseEnter={() => playSfx('uiHover')}
                     className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[120px] flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300 cursor-pointer group pointer-events-auto"
                 >
                     <div className="bg-white text-black px-6 py-3 rounded-full font-bold text-sm shadow-2xl flex items-center gap-3 group-hover:scale-110 transition-transform">
@@ -77,7 +86,12 @@ const HUD = () => {
             )}
 
             {/* Painting Detail View */}
-            <Dialog open={!!selectedPainting} onOpenChange={(open) => !open && setSelectedPainting(null)}>
+            <Dialog open={!!selectedPainting} onOpenChange={(open) => {
+                if (!open) {
+                    setSelectedPainting(null)
+                    playSfx('uiClick')
+                }
+            }}>
                 <DialogContent className="max-w-3xl bg-slate-950/90 border-slate-800 text-white">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-light tracking-tight">{selectedPainting?.title}</DialogTitle>
@@ -124,6 +138,7 @@ const HUD = () => {
                             <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-800/50">
                                 <button
                                     onClick={handlePrev}
+                                    onMouseEnter={() => playSfx('uiHover')}
                                     className="px-4 py-2 flex items-center gap-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors group"
                                 >
                                     <span className="group-hover:-translate-x-1 transition-transform">←</span>
@@ -139,6 +154,7 @@ const HUD = () => {
                                 </div>
                                 <button
                                     onClick={handleNext}
+                                    onMouseEnter={() => playSfx('uiHover')}
                                     className="px-4 py-2 flex items-center gap-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors group"
                                 >
                                     <span>Next</span>
@@ -184,19 +200,31 @@ const HUD = () => {
                     <p className="text-[10px] text-white/40 font-mono text-center uppercase tracking-widest px-2">Character</p>
                     <div className="flex gap-1">
                         <button
-                            onClick={() => setCharacterType('human')}
+                            onClick={() => {
+                                setCharacterType('human')
+                                playSfx('uiClick')
+                            }}
+                            onMouseEnter={() => playSfx('uiHover')}
                             className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-bold transition-all ${characterType === 'human' ? 'bg-white text-black underline underline-offset-4' : 'text-white/60 hover:bg-white/5'}`}
                         >
                             HUMAN
                         </button>
                         <button
-                            onClick={() => setCharacterType('bear')}
+                            onClick={() => {
+                                setCharacterType('bear')
+                                playSfx('uiClick')
+                            }}
+                            onMouseEnter={() => playSfx('uiHover')}
                             className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-bold transition-all ${characterType === 'bear' ? 'bg-white text-black underline underline-offset-4' : 'text-white/60 hover:bg-white/5'}`}
                         >
                             BEAR
                         </button>
                         <button
-                            onClick={() => setCharacterType('robot')}
+                            onClick={() => {
+                                setCharacterType('robot')
+                                playSfx('uiClick')
+                            }}
+                            onMouseEnter={() => playSfx('uiHover')}
                             className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-bold transition-all ${characterType === 'robot' ? 'bg-white text-black underline underline-offset-4' : 'text-white/60 hover:bg-white/5'}`}
                         >
                             ROBOT
